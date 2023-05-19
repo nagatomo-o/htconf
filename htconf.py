@@ -36,14 +36,10 @@ def abort(message):
     :param message to print to stderr (optional)
     """
     print(f"[ERROR] {message}", file=sys.stderr) if message else None
-    sys.exit(2)
-
 
 def ok():
     """gracefully terminate the script
     """
-    sys.exit(0)
-
 
 def esc(string):
     """Escape strings for config values
@@ -78,7 +74,7 @@ def get_indent(string):
     """Get indent from string
     1: string
     """
-    match = re.match(r'^( +)', string)
+    match = re.match(r'^([ \t]+)', string)
     if match:
         return match.group(1)
     else:
@@ -276,87 +272,68 @@ def enable_directive_with_section():
 # Main
 ##
 # print usage if no argument or help argument
-if len(sys.argv) == 0:
+if len(sys.argv) == 2 and (sys.argv[1] == "help" or sys.argv[1] == "--help"):
     usage()
     ok()
 
-if len(sys.argv) == 1 and sys.argv[1] == "help" or sys.argv[1] == "--help":
-    usage()
-    ok()
-
-if len(sys.argv) < 2:
-    usage()
-    ok()
-
-in_file = None
-out_file = None
-operation = sys.argv[1]
-directive = sys.argv[2]
-values = ""
-with_values = ""
-with_section = ""
-section_name = ""
-section_value = ""
-section_start_pattern = ""
-section_end_pattern = ""
-file_path = ""
-
-# print usage if no argument or help argument
-if len(sys.argv) == 0 or sys.argv[0] == "help" or sys.argv[0] == "--help":
-    usage()
-    ok()
-
-# Assign option value to variable
-operation = sys.argv[1]
-directive = sys.argv[2]
-in_file = sys.stdin
-out_file = sys.stdout
-short_options = "v:w:s:f:"
-long_options = ["value=", "with=", "section=", "file="]
-options, _ = getopt.getopt(sys.argv[3:], short_options, long_options)
-for opt, optarg in options:
-    if opt in ("-v", "--value"):
-        values += " " + esc(optarg)
-    elif opt in ("-w", "--with"):
-        with_values += " +" + regexp(optarg)
-    elif opt in ("-s", "--section"):
-        with_section = optarg
-    elif opt in ("-f", "--file"):
-        file_path = optarg
-
-# Create a section regular expression from the with_section variable
-if with_section:
-    if ':' in with_section:
-        section_name, section_value = with_section.split(":")
-        section_start_pattern = f"^( *)<({section_name}) +({regexp(section_value)})"
-    else:
-        section_name = with_section
-        section_start_pattern = f"^ *<{section_name} .+>"
-
-# Construct the name of the function to execute
-func = operation
-match = re.match(r'^\<(.+)\>', directive)
-if match:
-    directive = match.group(1)
-    func += "_section"
-else:
-    func += "_directive"
-
-if with_section:
-    func += "_with_section"
-
-# Rewrite the file if there is an file_path variable
-if file_path:
-    letters = string.ascii_letters + string.digits
-    tmp_file = ''.join(random.choice(letters) for _ in range(16))
-    shutil.copyfile(file_path, tmp_file)
-    with open(tmp_file, 'r') as in_file, open(file_path, 'w') as out_file:
-        eval(func + "()")
-    os.remove(tmp_file)
-    ok
-else:
-    # Piping if there is no file_path variable
+elif len(sys.argv) > 2:
+    operation = sys.argv[1]
+    directive = sys.argv[2]
+    values = ""
+    with_values = ""
+    with_section = ""
+    section_name = ""
+    section_value = ""
+    section_start_pattern = ""
+    section_end_pattern = ""
+    file_path = ""
+    # Assign option value to variable
     in_file = sys.stdin
     out_file = sys.stdout
-    eval(func + "()")
-    ok
+    short_options = "v:w:s:f:"
+    long_options = ["value=", "with=", "section=", "file="]
+    options, _ = getopt.getopt(sys.argv[3:], short_options, long_options)
+    for opt, optarg in options:
+        if opt in ("-v", "--value"):
+            values += " " + esc(optarg)
+        elif opt in ("-w", "--with"):
+            with_values += " +" + regexp(optarg)
+        elif opt in ("-s", "--section"):
+            with_section = optarg
+        elif opt in ("-f", "--file"):
+            file_path = optarg
+
+    # Create a section regular expression from the with_section variable
+    if with_section:
+        if ':' in with_section:
+            section_name, section_value = with_section.split(":")
+            section_start_pattern = f"^( *)<({section_name}) +({regexp(section_value)})"
+        else:
+            section_name = with_section
+            section_start_pattern = f"^ *<{section_name} .+>"
+
+    # Construct the name of the function to execute
+    func = operation
+    match = re.match(r'^\<(.+)\>', directive)
+    if match:
+        directive = match.group(1)
+        func += "_section"
+    else:
+        func += "_directive"
+
+    if with_section:
+        func += "_with_section"
+
+    # Rewrite the file if there is an file_path variable
+    if file_path:
+        letters = string.ascii_letters + string.digits
+        tmp_file = ''.join(random.choice(letters) for _ in range(16))
+        shutil.copyfile(file_path, tmp_file)
+        with open(tmp_file, 'r') as in_file, open(file_path, 'w') as out_file:
+            eval(func + "()")
+        os.remove(tmp_file)
+    else:
+        # Piping if there is no file_path variable
+        in_file = sys.stdin
+        out_file = sys.stdout
+        eval(func + "()")

@@ -2,10 +2,6 @@
 ##
 # usage output
 ##
-
-##
-# usage output
-##
 usage(){
   cat <<EOF
 Usage: htconf [operation] [NAME] [options]              Read text from stdin and write to stdout
@@ -40,7 +36,6 @@ abort(){
 ##
 ok(){
   IFS="$oldifs"
-  exit 0
 }
 
 ##
@@ -51,7 +46,7 @@ esc() {
   if [[ "$1" = *" "* ]] || [[ "$1" = *"\""* ]] || [[ "$1" = *"\\"* ]]; then
     echo "$1" \
     | sed -e 's/\\/\\\\/g' \
-    | sed -e 's/"/\\\\"/g' \
+    | sed -e 's/"/\\"/g' \
     | sed -e 's/^/"/' \
     | sed -e 's/$/"/'
   else
@@ -89,7 +84,7 @@ regexp() {
 # $1: string
 ##
 get_indent(){
-  echo "$1" | sed -E -e 's/^( *).+$/\1/'
+  echo "$1" | sed -E -e 's/^([ \t]*).+$/\1/'
 }
 
 ##
@@ -295,62 +290,61 @@ enable_directive_with_section() {
 ##
 # Main
 ##
-oldifs="$IFS"
-operation="$1"
-directive="$2"
-directive_pattern=""
-values=""
-with_values=""
-with_section=""
-section_name=""
-section_value=""
-section_start_pattern=""
-section_end_pattern=""
-file_path=""
-# print usage if no argument or help argument
-if [ $# -eq 0 -o "$1" = 'help' -o "$1" = '--help' ]; then
+if [ $# -eq 1 ] && [ "$1" = 'help' -o "$1" = '--help' ]; then
   usage
-  ok
-fi
-# Assign option value to variable
-shift 2
-while getopts v:w:s:f: OPT; do
-  case $OPT in
-    v) values+=" $(esc "$OPTARG")";;
-    w) with_values+=" +$(regexp "$OPTARG")";;
-    s) with_section="$OPTARG";;
-    f) file_path="$OPTARG";;
-  esac
-done
-# Create a section regular expression from the with_section variable
-if [ -n "$with_section" ]; then
-  if [[ "$with_section" = *":"* ]]; then
-    section_name=$(echo "$with_section" | sed -E -e 's/^(.+):(.+)$/\1/')
-    section_value=$(echo "$with_section" | sed -E -e 's/^(.+):(.+)$/\2/')
-    section_start_pattern="^ *<$section_name +$(regexp "$section_value")"
-  else
-    section_name="$with_section"
-    section_start_pattern="^ *<$section_name .+>"
+elif [ $# -gt 1 ]; then
+  oldifs="$IFS"
+  operation="$1"
+  directive="$2"
+  directive_pattern=""
+  values=""
+  with_values=""
+  with_section=""
+  section_name=""
+  section_value=""
+  section_start_pattern=""
+  section_end_pattern=""
+  file_path=""
+  # Assign option value to variable
+  shift 2
+  while getopts v:w:s:f: OPT; do
+    case $OPT in
+      v) values+=" $(esc "$OPTARG")";;
+      w) with_values+=" +$(regexp "$OPTARG")";;
+      s) with_section="$OPTARG";;
+      f) file_path="$OPTARG";;
+    esac
+  done
+  # Create a section regular expression from the with_section variable
+  if [ -n "$with_section" ]; then
+    if [[ "$with_section" = *":"* ]]; then
+      section_name=$(echo "$with_section" | sed -E -e 's/^(.+):(.+)$/\1/')
+      section_value=$(echo "$with_section" | sed -E -e 's/^(.+):(.+)$/\2/')
+      section_start_pattern="^ *<$section_name +$(regexp "$section_value")"
+    else
+      section_name="$with_section"
+      section_start_pattern="^ *<$section_name .+>"
+    fi
   fi
+  # Construct the name of the function to execute
+  func="$operation"
+  if [[ $directive =~ ^\<.+\>$ ]]; then
+    func+="_section"
+  else
+    func+="_directive"
+  fi
+  if [ -n "$with_section" ]; then
+    func+="_with_section"
+  fi
+  # Rewrite the file if there is an file_path variable
+  if [ -n "$file_path" ]; then
+    tmp_file=`cat /dev/urandom | base64 | fold -w 16 | head -n 1 | sed -e 's|/|-|'`
+    cp -p "$file_path" "$tmp_file"
+    $func < "$tmp_file" > "$file_path"
+    rm -f "$tmp_file"
+  else
+    # Piping if there is no file_path variable
+    $func
+  fi
+  IFS="$oldifs"
 fi
-# Construct the name of the function to execute
-func="$operation"
-if [[ $directive =~ ^\<.+\>$ ]]; then
-  func+="_section"
-else
-  func+="_directive"
-fi
-if [ -n "$with_section" ]; then
-  func+="_with_section"
-fi
-# Rewrite the file if there is an file_path variable
-if [ -n "$file_path" ]; then
-  tmp_file=`cat /dev/urandom | base64 | fold -w 16 | head -n 1 | sed -e 's|/|-|'`
-  cp -p "$file_path" "$tmp_file"
-  $func < "$tmp_file" > "$file_path"
-  rm -f "$tmp_file"
-  ok
-fi
-# Piping if there is no file_path variable
-$func
-ok
