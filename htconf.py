@@ -183,7 +183,8 @@ def set_section_with_section():
 
         if in_section and re.match(directive_pattern, line):
             print(f"{get_indent(line)}<{directive}{values}>", file=out_file)
-        print(line, end='', file=out_file)
+        else:
+            print(line, end='', file=out_file)
 
 
 def disable_directive():
