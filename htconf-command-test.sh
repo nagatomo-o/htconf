@@ -363,4 +363,4 @@ test_enable_directive_with_multi_value_with_section(){
 }
 
 # Load and run shUnit2.
-source ./shunit2-2.1.8/shunit2
+source ./shunit2/shunit2

@@ -31,17 +31,7 @@ options:
 ''')
 
 
-def abort(message):
-    """Abort script
-    :param message to print to stderr (optional)
-    """
-    print(f"[ERROR] {message}", file=sys.stderr) if message else None
-
-def ok():
-    """gracefully terminate the script
-    """
-
-def esc(string):
+def esc_conf(string):
     """Escape strings for config values
     {string} string to escape
     """
@@ -51,24 +41,26 @@ def esc(string):
     else:
         return string
 
-def regexp(string):
+
+def esc_regexp(string):
     """Escape strings for regular expressions
     """
     return '"?' + string.replace('"', '\\"') \
-            .replace('\\', '\\\\') \
-            .replace('.', '\\.') \
-            .replace('^', '\\^') \
-            .replace('$', '\\$') \
-            .replace('*', '\\*') \
-            .replace('+', '\\+') \
-            .replace('?', '\\?') \
-            .replace('{', '\\{') \
-            .replace('}', '\\}') \
-            .replace('(', '\\(') \
-            .replace(')', '\\)') \
-            .replace('[', '\\[') \
-            .replace(']', '\\]') \
-            .replace('|', '\\|') + '"?'
+        .replace('\\', '\\\\') \
+        .replace('.', '\\.') \
+        .replace('^', '\\^') \
+        .replace('$', '\\$') \
+        .replace('*', '\\*') \
+        .replace('+', '\\+') \
+        .replace('?', '\\?') \
+        .replace('{', '\\{') \
+        .replace('}', '\\}') \
+        .replace('(', '\\(') \
+        .replace(')', '\\)') \
+        .replace('[', '\\[') \
+        .replace(']', '\\]') \
+        .replace('|', '\\|') + '"?'
+
 
 def get_indent(string):
     """Get indent from string
@@ -274,7 +266,6 @@ def enable_directive_with_section():
 # print usage if no argument or help argument
 if len(sys.argv) == 2 and (sys.argv[1] == "help" or sys.argv[1] == "--help"):
     usage()
-    ok()
 
 elif len(sys.argv) > 2:
     operation = sys.argv[1]
@@ -295,9 +286,9 @@ elif len(sys.argv) > 2:
     options, _ = getopt.getopt(sys.argv[3:], short_options, long_options)
     for opt, optarg in options:
         if opt in ("-v", "--value"):
-            values += " " + esc(optarg)
+            values += " " + esc_conf(optarg)
         elif opt in ("-w", "--with"):
-            with_values += " +" + regexp(optarg)
+            with_values += " +" + esc_regexp(optarg)
         elif opt in ("-s", "--section"):
             with_section = optarg
         elif opt in ("-f", "--file"):
@@ -307,7 +298,7 @@ elif len(sys.argv) > 2:
     if with_section:
         if ':' in with_section:
             section_name, section_value = with_section.split(":")
-            section_start_pattern = f"^( *)<({section_name}) +({regexp(section_value)})"
+            section_start_pattern = f"^( *)<({section_name}) +({esc_regexp(section_value)})"
         else:
             section_name = with_section
             section_start_pattern = f"^ *<{section_name} .+>"

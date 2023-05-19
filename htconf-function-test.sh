@@ -1,105 +1,105 @@
 #!/bin/bash
 source ./htconf.sh
-# Tests for the esc() function
+# Tests for the esc_conf() function
 test_esc_no_escape() {
-  actual=$(esc "hello")
+  actual=$(esc_conf "hello")
   expect="hello"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_esc_escape_space() {
-  actual=$(esc "hello world")
+test_esc_conf_space() {
+  actual=$(esc_conf "hello world")
   expect="\"hello world\""
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_esc_escape_quote() {
-  actual=$(esc "hello\"world")
+test_esc_conf_quote() {
+  actual=$(esc_conf "hello\"world")
   expect="\"hello\\\"world\""
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_esc_escape_backslash() {
-  actual=$(esc "hello\\world")
+test_esc_conf_backslash() {
+  actual=$(esc_conf "hello\\world")
   expect="\"hello\\\\world\""
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_esc_escape_multiple_chars() {
-  actual=$(esc "he\"llo\\w\"orl\\\"d")
+test_esc_conf_multiple_chars() {
+  actual=$(esc_conf "he\"llo\\w\"orl\\\"d")
   expect="\"he\\\"llo\\\\w\\\"orl\\\\\\\"d\""
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-# Tests for the regexp() function
-test_regexp_no_escape(){
-  actual=$(regexp "hello world")
+# Tests for the esc_regexp() function
+test_esc_regexp_no_escape(){
+  actual=$(esc_regexp "hello world")
   expect="\"?hello world\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_dot(){
-  actual=$(regexp "hello.worl.d")
+test_esc_regexp_dot(){
+  actual=$(esc_regexp "hello.worl.d")
   expect="\"?hello\\.worl\\.d\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_backslash(){
-  actual=$(regexp "hello\\worl\\d")
+test_esc_regexp_backslash(){
+  actual=$(esc_regexp "hello\\worl\\d")
   expect="\"?hello\\\\worl\\\\d\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_aster(){
-  actual=$(regexp "hello*worl*d")
+test_esc_regexp_aster(){
+  actual=$(esc_regexp "hello*worl*d")
   expect="\"?hello\\*worl\\*d\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_plus(){
-  actual=$(regexp "hello+worl+d")
+test_esc_regexp_plus(){
+  actual=$(esc_regexp "hello+worl+d")
   expect="\"?hello\\+worl\\+d\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_question(){
-  actual=$(regexp "hello?worl?d")
+test_esc_regexp_question(){
+  actual=$(esc_regexp "hello?worl?d")
   expect="\"?hello\\?worl\\?d\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_brackets(){
-  actual=$(regexp "[hello[ ]world]")
+test_esc_regexp_brackets(){
+  actual=$(esc_regexp "[hello[ ]world]")
   expect="\"?\\[hello\\[ \\]world\\]\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_parentheses(){
-  actual=$(regexp "(hello( )world)")
+test_esc_regexp_parentheses(){
+  actual=$(esc_regexp "(hello( )world)")
   expect="\"?\\(hello\\( \\)world\\)\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_braces(){
-  actual=$(regexp "{hello{ }world}")
+test_esc_regexp_braces(){
+  actual=$(esc_regexp "{hello{ }world}")
   expect="\"?\\{hello\\{ \\}world\\}\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_doll(){
-  actual=$(regexp "hello\$worl\$d")
+test_esc_regexp_doll(){
+  actual=$(esc_regexp "hello\$worl\$d")
   expect="\"?hello\\\$worl\\\$d\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_tilde(){
-  actual=$(regexp "hello^worl^d")
+test_esc_regexp_tilde(){
+  actual=$(esc_regexp "hello^worl^d")
   expect="\"?hello\\^worl\\^d\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
-test_regexp_verticalbar(){
-  actual=$(regexp "hello|worl|d")
+test_esc_regexp_verticalbar(){
+  actual=$(esc_regexp "hello|worl|d")
   expect="\"?hello\\|worl\\|d\"?"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
@@ -130,4 +130,4 @@ test_get_indent_mixed(){
 }
 
 # Load and run shUnit2.
-source ./shunit2-2.1.8/shunit2
+source ./shunit2/shunit2

@@ -22,27 +22,10 @@ EOF
 }
 
 ##
-# Abort script
-# $1: message to print to stderr (optional)
-##
-abort(){
-  test -n "$1" && echo "[ERROR] $1" >&2
-  IFS="$oldifs"
-  exit 2
-}
-
-##
-# gracefully terminate the script
-##
-ok(){
-  IFS="$oldifs"
-}
-
-##
 # Escape strings for config values
 # $1: string to escape
 ##
-esc() {
+esc_conf() {
   if [[ "$1" = *" "* ]] || [[ "$1" = *"\""* ]] || [[ "$1" = *"\\"* ]]; then
     echo "$1" \
     | sed -e 's/\\/\\\\/g' \
@@ -58,7 +41,7 @@ esc() {
 # Escape strings for regular expressions
 # $1: string to escape
 ##
-regexp() {
+esc_regexp() {
   echo "$1" \
     | sed -e 's/"/\\"/g' \
     | sed -e 's/\\/\\\\/g' \
@@ -121,7 +104,7 @@ add_directive_with_section() {
   done
 
   if $not_added; then
-    echo "<$section_name $(esc "$section_value")>"
+    echo "<$section_name $(esc_conf "$section_value")>"
     echo "    $directive$values"
     echo "</$section_name>"
   fi
@@ -309,8 +292,8 @@ elif [ $# -gt 1 ]; then
   shift 2
   while getopts v:w:s:f: OPT; do
     case $OPT in
-      v) values+=" $(esc "$OPTARG")";;
-      w) with_values+=" +$(regexp "$OPTARG")";;
+      v) values+=" $(esc_conf "$OPTARG")";;
+      w) with_values+=" +$(esc_regexp "$OPTARG")";;
       s) with_section="$OPTARG";;
       f) file_path="$OPTARG";;
     esac
@@ -320,7 +303,7 @@ elif [ $# -gt 1 ]; then
     if [[ "$with_section" = *":"* ]]; then
       section_name=$(echo "$with_section" | sed -E -e 's/^(.+):(.+)$/\1/')
       section_value=$(echo "$with_section" | sed -E -e 's/^(.+):(.+)$/\2/')
-      section_start_pattern="^ *<$section_name +$(regexp "$section_value")"
+      section_start_pattern="^ *<$section_name +$(esc_regexp "$section_value")"
     else
       section_name="$with_section"
       section_start_pattern="^ *<$section_name .+>"
