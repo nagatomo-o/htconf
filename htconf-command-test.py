@@ -130,7 +130,8 @@ Dir4 On \"{\\\"name\\\":\\\"value\\\"}\"
         self.assertEqual(expect, actual, "Result should match expected output")
 
     def test_set_directive_multi_value_with_single_value_without_section(self):
-        actual = call(["set", "Dir4", "-v", "Off", "-v", "{\"name\":\"value\"}", "-w", "On"], SAMPLE)
+        actual = call(["set", "Dir4", "-v", "Off", "-v",
+                      "{\"name\":\"value\"}", "-w", "On"], SAMPLE)
         expect = """Dir1 None
 Dir2 \"\\\"a\\\\z\\\"\"
 Dir3 On \"($)+\"
@@ -205,7 +206,8 @@ Dir4 Off \"[*].?\"
         self.assertEqual(expect, actual, "Result should match expected output")
 
     def test_set_section_single_value_with_single_value_with_section(self):
-        actual = call(["set", "<Sec2>", "-v", "/var/www/html", "-w", "/var/www", "-s", "Sec1:/"], SAMPLE)
+        actual = call(["set", "<Sec2>", "-v", "/var/www/html",
+                      "-w", "/var/www", "-s", "Sec1:/"], SAMPLE)
         expect = """Dir1 None
 Dir2 \"\\\"a\\\\z\\\"\"
 Dir3 On \"($)+\"
@@ -216,6 +218,172 @@ Dir4 Off \"[*].?\"
     Dir4 On \"($)+\"
     Dir4 Off \"($)+\"
     <Sec2 /var/www/html>
+        Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+"""
+        self.assertEqual(expect, actual, "Result should match expected output")
+
+
+class TestDisableDirective(unittest.TestCase):
+    def test_disable_directive_without_value_without_section(self):
+        actual = call(["disable", "Dir2"], SAMPLE)
+        expect = """Dir1 None
+#Dir2 \"\\\"a\\\\z\\\"\"
+Dir3 On \"($)+\"
+Dir4 Off \"[*].?\"
+<Sec1 />
+    #Dir2 None
+    #Dir2 \"\\\"a\\\\z\\\"\"
+    Dir4 On \"($)+\"
+    Dir4 Off \"($)+\"
+    <Sec2 \"/var/www\">
+        Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+"""
+        self.assertEqual(expect, actual, "Result should match expected output")
+
+    def test_disable_directive_with_single_value_without_section(self):
+        actual = call(["disable", "Dir2", "-w", "None"], SAMPLE)
+        expect = """Dir1 None
+Dir2 \"\\\"a\\\\z\\\"\"
+Dir3 On \"($)+\"
+Dir4 Off \"[*].?\"
+<Sec1 />
+    #Dir2 None
+    Dir2 \"\\\"a\\\\z\\\"\"
+    Dir4 On \"($)+\"
+    Dir4 Off \"($)+\"
+    <Sec2 \"/var/www\">
+        Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+"""
+        self.assertEqual(expect, actual, "Result should match expected output")
+
+    def test_disable_directive_with_multi_value_without_section(self):
+        actual = call(["disable", "Dir4", "-w", "Off", "-w", "($)+"], SAMPLE)
+        expect = """Dir1 None
+Dir2 \"\\\"a\\\\z\\\"\"
+Dir3 On \"($)+\"
+Dir4 Off \"[*].?\"
+<Sec1 />
+    Dir2 None
+    Dir2 \"\\\"a\\\\z\\\"\"
+    Dir4 On \"($)+\"
+    #Dir4 Off \"($)+\"
+    <Sec2 \"/var/www\">
+        Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+"""
+        self.assertEqual(expect, actual, "Result should match expected output")
+
+    def test_disable_directive_with_multi_value_with_section(self):
+        actual = call(["disable", "Dir4", "-w", "Off", "-w",
+                      "[*].?", "-s", "Sec2:/var/www"], SAMPLE)
+        expect = """Dir1 None
+Dir2 \"\\\"a\\\\z\\\"\"
+Dir3 On \"($)+\"
+Dir4 Off \"[*].?\"
+<Sec1 />
+    Dir2 None
+    Dir2 \"\\\"a\\\\z\\\"\"
+    Dir4 On \"($)+\"
+    Dir4 Off \"($)+\"
+    <Sec2 \"/var/www\">
+        #Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+"""
+        self.assertEqual(expect, actual, "Result should match expected output")
+
+
+SAMPLE2 = """#Dir1 None
+#Dir2 \"\\\"a\\\\z\\\"\"
+#Dir3 On \"($)+\"
+#Dir4 Off \"[*].?\"
+<Sec1 />
+    #Dir2 None
+    #Dir2 \"\\\"a\\\\z\\\"\"
+    #Dir4 On \"($)+\"
+    #Dir4 Off \"($)+\"
+    <Sec2 \"/var/www\">
+        #Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+"""
+
+
+class TestEnableDirective(unittest.TestCase):
+    def test_enable_directive_without_value_without_section(self):
+        actual = call(["enable", "Dir2"], SAMPLE2)
+        expect = """#Dir1 None
+Dir2 \"\\\"a\\\\z\\\"\"
+#Dir3 On \"($)+\"
+#Dir4 Off \"[*].?\"
+<Sec1 />
+    Dir2 None
+    Dir2 \"\\\"a\\\\z\\\"\"
+    #Dir4 On \"($)+\"
+    #Dir4 Off \"($)+\"
+    <Sec2 \"/var/www\">
+        #Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+"""
+        self.assertEqual(expect, actual, "Result should match expected output")
+
+    def test_disable_directive_with_single_value_without_section(self):
+        actual = call(["enable", "Dir2", "-w", "None"], SAMPLE2)
+        expect = """#Dir1 None
+#Dir2 \"\\\"a\\\\z\\\"\"
+#Dir3 On \"($)+\"
+#Dir4 Off \"[*].?\"
+<Sec1 />
+    Dir2 None
+    #Dir2 \"\\\"a\\\\z\\\"\"
+    #Dir4 On \"($)+\"
+    #Dir4 Off \"($)+\"
+    <Sec2 \"/var/www\">
+        #Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+"""
+        self.assertEqual(expect, actual, "Result should match expected output")
+
+    def test_enable_directive_with_multi_value_without_section(self):
+        actual = call(["enable", "Dir4", "-w", "Off", "-w", "($)+"], SAMPLE2)
+        expect = """#Dir1 None
+#Dir2 \"\\\"a\\\\z\\\"\"
+#Dir3 On \"($)+\"
+#Dir4 Off \"[*].?\"
+<Sec1 />
+    #Dir2 None
+    #Dir2 \"\\\"a\\\\z\\\"\"
+    #Dir4 On \"($)+\"
+    Dir4 Off \"($)+\"
+    <Sec2 \"/var/www\">
+        #Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+"""
+        self.assertEqual(expect, actual, "Result should match expected output")
+
+    def test_enable_directive_with_multi_value_with_section(self):
+        actual = call(["enable", "Dir4", "-w", "Off", "-w",
+                      "[*].?", "-s", "Sec2:/var/www"], SAMPLE2)
+        expect = """#Dir1 None
+#Dir2 \"\\\"a\\\\z\\\"\"
+#Dir3 On \"($)+\"
+#Dir4 Off \"[*].?\"
+<Sec1 />
+    #Dir2 None
+    #Dir2 \"\\\"a\\\\z\\\"\"
+    #Dir4 On \"($)+\"
+    #Dir4 Off \"($)+\"
+    <Sec2 \"/var/www\">
         Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>
