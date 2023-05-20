@@ -204,6 +204,27 @@ Dir4 Off \"[*].?\"
   assertEquals "Result should match expected output" "$expect" "$actual"
 }
 
+test_set_section_single_value_with_single_value_with_section_file() {
+  actual_file=/tmp/httpd.conf
+  expect="Dir1 None
+Dir2 \"\\\"a\\\\z\\\"\"
+Dir3 On \"(\$)+\"
+Dir4 Off \"[*].?\"
+<Sec1 />
+    Dir2 None
+    Dir2 \"\\\"a\\\\z\\\"\"
+    Dir4 On \"(\$)+\"
+    Dir4 Off \"(\$)+\"
+    <Sec2 /var/www/html>
+        Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>"
+  echo "$SAMPLE" > $actual_file
+  $HTCONF set "<Sec2>" -v "/var/www/html" -w /var/www -s Sec1:/ -f $actual_file
+  actual=$(cat $actual_file)
+  assertEquals "Result should match expected output" "$expect" "$actual"
+}
+
 test_disable_directive_without_value_without_section(){
   actual=$(echo "$SAMPLE" | $HTCONF disable Dir2)
   expect="Dir1 None

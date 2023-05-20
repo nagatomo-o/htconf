@@ -1,7 +1,8 @@
 #!/bin/bash
 source ./htconf.sh
+
 # Tests for the esc_conf() function
-test_esc_no_escape() {
+test_esc_conf_no_escape() {
   actual=$(esc_conf "hello")
   expect="hello"
   assertEquals "Result should match expected output" "$expect" "$actual"
