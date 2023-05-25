@@ -7,38 +7,42 @@ Command to Edit Apache configuration directives (stdin or file)
 ### Bash
 
 ```
-curl -o /usr/local/bin/htconf https://github.com/nagatomo-o/htconf/blob/main/src/bash/htconf.sh
+curl -o /usr/local/bin/htconf -Lf https://github.com/nagatomo-o/htconf/archive/refs/tags/v1.0.0.zip
 chmod 755 /usr/local/bin/htconf
 ```
 ### Python
 
 ```
-curl -o /usr/local/bin/htconf https://github.com/nagatomo-o/htconf/blob/main/src/python/htconf.py
+curl -o /usr/local/bin/htconf -Lf https://github.com/nagatomo-o/htconf/blob/main/src/python/htconf.py
 chmod 755 /usr/local/bin/htconf
 ```
 
 # Usage
 
 ```sh
-htconf [operation] [NAME] [options]                 Read text from stdin and write to stdout
-htconf [operation] [NAME] [options] -f [file]       Edit file
-htconf --help                                       Usage output
+htconf [operation] [NAME] [options]              Edit text as pipe
+htconf [operation] [NAME] [options] -f [file]    Edit text file
+htconf -e "[ARGS]" -e "[ARGS]" ...               Edit text with multiple operations as a pipe
+htconf -e "[ARGS]" -e "[ARGS]" ... -f [file]     Edit text file with multiple operations
+htconf --help                                    Show usage information
 ```
 
 ## Arguments
 
 ```
-    [operation]     [add,set,disable,enable]
-    [NAME]          Directive name
-                     (Add "<" ">" if section directive)
+        operation     add, set, disable, enable
+        NAME          Directive name
+                      If it is a section directive name, enclose it with "<" and ">"
 ```
 
 ## Options
 ```
-    -v VALUE        Value of the directive to set
-    -w VALUE        Matching Directive Value
-    -s SECTION      Matching Directive Section
-                    Format: <Section Name>:<Section Value>
+        -v VALUE      Value of the directive to set
+        -w VALUE      Matching Directive Value
+        -s SECTION    Matching Directive Section
+                      Format: <Section Name>:<Section Value>
+        -f FILE       Editing file
+        -e ARGS       [operation] [NAME] [options] as string
 ```
 
 # Example
@@ -79,6 +83,17 @@ htconf set AllowOverride -v AuthConfig -v Options -w none -s Directory:/
 -     AllowOverride none
 +     AllowOverride AuthConfig Options
       Require all denied
+  </Directory>
+```
+
+## Add directive value
+```sh
+htconf set "<Directory>" -v /var/www -w /
+```
+```diff
+- <Directory />
++ <Directory /var/www>
+      RewriteEngine On
   </Directory>
 ```
 
@@ -129,9 +144,30 @@ htconf enable AddType
 
 ## Uncomment directives with values
 ```sh
-htconf enable AddType -w application/x-gzip -w .Z
+htconf enable AddType -w application/x-gzip -w .gz
 ```
 ```diff
   #AddType application/x-compress .Z
 - #AddType application/x-gzip .gz .tgz
 + AddType application/x-gzip .gz .tgz
+```
+
+## Uncomment directives and set new-value with values
+```sh
+htconf enable AddType -v .gz -v .tgz -v .tar.gz -w application/x-gzip -w .gz
+```
+```diff
+  #AddType application/x-compress .Z
+- #AddType application/x-gzip .gz .tgz
++ AddType application/x-gzip .gz .tgz .tar.gz
+```
+
+## Multiple Operation as pipe
+```sh
+htconf -e "enable AddType -w application/x-gzip" -e "set AddType -v application/gzip -v .gz -v .tgz -v .tar.gz -w application/x-gzip"
+```
+```diff
+  AddType application/x-compress .Z
+- #AddType application/x-gzip .gz .tgz
++ AddType application/x-gzip .gz .tgz .tar.gz
+```

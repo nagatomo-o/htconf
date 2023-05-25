@@ -20,14 +20,18 @@ test_add_directive_single_value_without_section() {
   actual=$(echo "$SAMPLE" | $HTCONF add Dir9 -v AAA)
   expect="$SAMPLE
 Dir9 AAA"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_add_directive_multi_value_without_section() {
   actual=$(echo "$SAMPLE" | $HTCONF add Dir9 -v BBB -v "{\"name\":\"value\"}")
   expect="$SAMPLE
 Dir9 BBB \"{\\\"name\\\":\\\"value\\\"}\""
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_add_directive_multi_value_with_noexists_section() {
@@ -36,7 +40,9 @@ test_add_directive_multi_value_with_noexists_section() {
 <Sec3 DDD>
     Dir9 CCC \"{\\\"path\\\":\\\"c:\\\\path\\\"}\"
 </Sec3>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_add_directive_multi_value_with_first_section() {
@@ -55,7 +61,9 @@ Dir4 Off \"[*].?\"
     </Sec2>
     Dir9 EEE \"/a[ ]+\$/\"
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_add_directive_multi_value_with_second_section() {
@@ -74,7 +82,9 @@ Dir4 Off \"[*].?\"
         Dir9 FFF \"/a[ ]+\$/\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 # set directive
@@ -93,7 +103,9 @@ Dir4 Off \"[*].?\"
         Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_set_directive_multi_value_without_value_without_section() {
@@ -111,7 +123,9 @@ Dir4 On \"{\\\"name\\\":\\\"value\\\"}\"
         Dir4 On \"{\\\"name\\\":\\\"value\\\"}\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_set_directive_multi_value_with_single_value_without_section() {
@@ -129,7 +143,9 @@ Dir4 Off \"[*].?\"
         Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_set_directive_multi_value_with_multi_value_without_section() {
@@ -147,7 +163,9 @@ Dir4 Off \"[*].?\"
         Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_set_directive_multi_value_with_multi_value_with_section(){
@@ -165,7 +183,9 @@ Dir4 Off \"[*].?\"
         Dir4 On \"{\\\"name\\\":\\\"value\\\"}\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_set_section_single_value_with_single_value_without_section(){
@@ -183,7 +203,9 @@ Dir4 Off \"[*].?\"
         Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_set_section_single_value_with_single_value_with_section(){
@@ -201,11 +223,13 @@ Dir4 Off \"[*].?\"
         Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_set_section_single_value_with_single_value_with_section_file() {
-  actual_file=/tmp/httpd.conf
+  actual_file=/tmp/test_set_section_single_value_with_single_value_with_section_file.conf
   expect="Dir1 None
 Dir2 \"\\\"a\\\\z\\\"\"
 Dir3 On \"(\$)+\"
@@ -222,7 +246,9 @@ Dir4 Off \"[*].?\"
   echo "$SAMPLE" > $actual_file
   $HTCONF set "<Sec2>" -v "/var/www/html" -w /var/www -s Sec1:/ -f $actual_file
   actual=$(cat $actual_file)
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_disable_directive_without_value_without_section(){
@@ -240,7 +266,9 @@ Dir4 Off \"[*].?\"
         Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_disable_directive_with_single_value_without_section(){
@@ -258,7 +286,9 @@ Dir4 Off \"[*].?\"
         Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_disable_directive_with_multi_value_without_section(){
@@ -276,7 +306,9 @@ Dir4 Off \"[*].?\"
         Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_disable_directive_with_multi_value_with_section(){
@@ -294,7 +326,9 @@ Dir4 Off \"[*].?\"
         #Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 SAMPLE2="#Dir1 None
@@ -326,7 +360,9 @@ Dir2 \"\\\"a\\\\z\\\"\"
         #Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_enable_directive_with_single_value_without_section(){
@@ -344,7 +380,9 @@ test_enable_directive_with_single_value_without_section(){
         #Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_enable_directive_with_multi_value_without_section(){
@@ -362,7 +400,29 @@ test_enable_directive_with_multi_value_without_section(){
         #Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
+}
+
+test_enable_directive_set_value_with_multi_value_without_section(){
+  actual=$(echo "$SAMPLE2" | $HTCONF enable Dir4 -v XXX -v "{\"name\":\"value\"}" -w Off -w "(\$)+")
+  expect="#Dir1 None
+#Dir2 \"\\\"a\\\\z\\\"\"
+#Dir3 On \"(\$)+\"
+#Dir4 Off \"[*].?\"
+<Sec1 />
+    #Dir2 None
+    #Dir2 \"\\\"a\\\\z\\\"\"
+    #Dir4 On \"(\$)+\"
+    Dir4 XXX \"{\\\"name\\\":\\\"value\\\"}\"
+    <Sec2 \"/var/www\">
+        #Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 test_enable_directive_with_multi_value_with_section(){
@@ -380,7 +440,82 @@ test_enable_directive_with_multi_value_with_section(){
         Dir4 Off \"[*].?\"
     </Sec2>
 </Sec1>"
-  assertEquals "Result should match expected output" "$expect" "$actual"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
+}
+
+test_enable_directive_with_multi_value_with_section(){
+  actual=$(echo "$SAMPLE2" | $HTCONF enable Dir4 -v XXX -v "{\"name\":\"value\"}" -w Off -w "[*].?" -s Sec2:/var/www)
+  expect="#Dir1 None
+#Dir2 \"\\\"a\\\\z\\\"\"
+#Dir3 On \"(\$)+\"
+#Dir4 Off \"[*].?\"
+<Sec1 />
+    #Dir2 None
+    #Dir2 \"\\\"a\\\\z\\\"\"
+    #Dir4 On \"(\$)+\"
+    #Dir4 Off \"(\$)+\"
+    <Sec2 \"/var/www\">
+        Dir4 XXX \"{\\\"name\\\":\\\"value\\\"}\"
+    </Sec2>
+</Sec1>"
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
+}
+
+test_multiple_operation_pipe() {
+  expect="Dir1 None
+Dir2 \"\\\"a\\\\z\\\"\"
+Dir3 On \"(\$)+\"
+Dir4 Off \"[*].?\"
+<Sec1 />
+    Dir2 On
+    Dir2 \"\\\"a\\\\z\\\"\"
+    Dir4 On \"(\$)+\"
+    Dir4 Off \"(\$)+\"
+    <Sec2 /var/www/html>
+        Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+Dir4 XXX"
+  actual=$(echo "$SAMPLE" | $HTCONF \
+    -e "set '<Sec2>' -v /var/www/html -w /var/www -s Sec1:/" \
+    -e "add Dir4 -v XXX" \
+    -e "set Dir2 -v On -w None" \
+  )
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
+}
+
+test_multiple_operation_file() {
+  actual_file=/tmp/test_multiple_operation_file.conf
+  expect="Dir1 None
+Dir2 \"\\\"a\\\\z\\\"\"
+Dir3 On \"(\$)+\"
+Dir4 Off \"[*].?\"
+<Sec1 />
+    Dir2 On
+    Dir2 \"\\\"a\\\\z\\\"\"
+    Dir4 On \"(\$)+\"
+    Dir4 Off \"(\$)+\"
+    <Sec2 /var/www/html>
+        Dir4 Off \"[*].?\"
+    </Sec2>
+</Sec1>
+Dir4 XXX"
+  echo "$SAMPLE" > $actual_file
+  $HTCONF \
+    -e "add Dir4 -v XXX"\
+    -e "set Dir2 -v On -w None"\
+    -e "set '<Sec2>' -v /var/www/html -w /var/www -s Sec1:/"\
+    -f $actual_file
+  actual=$(cat $actual_file)
+  if [ "$expect" != "$actual" ]; then
+    failNotEquals "Result should match expected output expected:" "$expect" "$actual"
+  fi
 }
 
 # Load and run shUnit2.
