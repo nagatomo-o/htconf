@@ -6,14 +6,16 @@ Command to Edit Apache configuration directives (stdin or file)
 
 ### Bash
 
-```
-curl -o /usr/local/bin/htconf -Lf https://github.com/nagatomo-o/htconf/archive/refs/tags/v1.0.0.zip
+```sh
+curl -Lf https://github.com/nagatomo-o/htconf/archive/v1.0.tar.gz | tar -zx --strip-component 1 htconf-1.0/htconf.sh
+mv htconf.sh /usr/local/bin/htconf
 chmod 755 /usr/local/bin/htconf
 ```
 ### Python
 
-```
-curl -o /usr/local/bin/htconf -Lf https://github.com/nagatomo-o/htconf/blob/main/src/python/htconf.py
+```sh
+curl -Lf https://github.com/nagatomo-o/htconf/archive/v1.0.tar.gz | tar -zx --strip-component 1 htconf-1.0/htconf.py
+mv htconf.py /usr/local/bin/htconf
 chmod 755 /usr/local/bin/htconf
 ```
 
@@ -46,6 +48,22 @@ htconf --help                                    Show usage information
 ```
 
 # Example
+
+## Edit text file with multiple operations
+```sh
+htconf -f /etc/httpd/conf/httpd.conf \
+    -e "add Dir4 -v XXX" \
+    -e "set Dir2 -v On -w None" \
+    -e "set '<Sec2>' -v /var/www/html -w /var/www -s Sec1:/"
+```
+
+## Edit text with multiple operations as a pipe
+```sh
+cat /etc/httpd/conf/httpd.conf | htconf \
+    -e "add Dir4 -v XXX" \
+    -e "set Dir2 -v On -w None" \
+    -e "set '<Sec2>' -v /var/www/html -w /var/www -s Sec1:/"
+```
 
 ## Add directive
 ```sh
